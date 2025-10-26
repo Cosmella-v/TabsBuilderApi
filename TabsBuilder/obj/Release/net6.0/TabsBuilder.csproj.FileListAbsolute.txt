@@ -1,0 +1,10 @@
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\bin\Release\net6.0\TabsBuilder.deps.json
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\bin\Release\net6.0\TabsBuilder.dll
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.csproj.AssemblyReference.cache
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.GeneratedMSBuildEditorConfig.editorconfig
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.AssemblyInfoInputs.cache
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.AssemblyInfo.cs
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.csproj.CoreCompileInputs.cache
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\TabsBuilder.dll
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\refint\TabsBuilder.dll
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\net6.0\ref\TabsBuilder.dll

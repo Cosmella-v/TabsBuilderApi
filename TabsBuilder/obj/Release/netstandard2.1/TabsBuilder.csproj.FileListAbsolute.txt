@@ -1,0 +1,5 @@
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\netstandard2.1\TabsBuilder.csproj.AssemblyReference.cache
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\netstandard2.1\TabsBuilder.GeneratedMSBuildEditorConfig.editorconfig
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\netstandard2.1\TabsBuilder.AssemblyInfoInputs.cache
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\netstandard2.1\TabsBuilder.AssemblyInfo.cs
+E:\Download.backup\balls\TabsBuilder\TabsBuilder\obj\Release\netstandard2.1\TabsBuilder.csproj.CoreCompileInputs.cache
