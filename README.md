@@ -1,15 +1,5 @@
-# OutfitsPresets
-- A mod that allows you to save outfits to switch them quickly
-- you can find it in your inventory and or laptop in a lobby
-- you can save and also delete presets ingame.
+# TabsBuilderApi
+- A mod that allows you to make tabs in the Player Customization Menu
 
-- Presets are saved at `%APPDATA%/../LocalLow/Innersloth/Among Us/OutfitPresets` so if you want to share them go here
-
-- if for some reason you wanna make one without being ingame the json file is structured like this:
-`{
-"Hat" :"hatid",
-"Visor" :"visorid",
-"Skin" :"skinid",
-"Color" :colorindex,
-"Pet" :"petid"
-}`
+- as of right now a mod that uses this you can base it on is
+https://github.com/Cosmella-v/OutfitsPresets
