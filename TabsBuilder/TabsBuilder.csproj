@@ -11,7 +11,16 @@
 		
 		<Description>Api for tabs in among us</Description>
 		
-		<!-- <Authors>your name</Authors> -->
+		<Authors>Cosmella</Authors>
+		<RepositoryUrl>https://github.com/Cosmella-v/TabsBuilderApi</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIconUrl></PackageIconUrl>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile></PackageReadmeFile>
+		<PackageIconUrl>https://github.com/Cosmella-v/TabsBuilderApi/blob/main/icon.png?raw=true</PackageIconUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 	</PropertyGroup>
 		<ItemGroup>
@@ -22,6 +31,8 @@
 			<PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.10.29" PrivateAssets="all" />
 
 			<PackageReference Include="BepInEx.AutoPlugin" Version="1.1.0" PrivateAssets="all" />
+			<None Include="./../icon.png" Pack="true"  PackagePath="\" />
+			<None Include="./../README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 	
 	<Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
