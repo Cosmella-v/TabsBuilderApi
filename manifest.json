@@ -1,6 +1,6 @@
 {
     "name": "TabsBuilderApi",
-    "version_number": "1.0.0",
+    "version_number": "1.1.0",
     "website_url": "https://github.com/Cosmella-v/TabsBuilderApi",
     "description": "Api for Building Tabs in the Player Customization Menu",
     "dependencies": [

@@ -1,3 +1,2 @@
-# 1.0.1
-- fixed support town of us r
-- optimised tab creation
+# 1.1.0
+- added among us thing because i forgor
