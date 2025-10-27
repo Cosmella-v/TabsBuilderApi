@@ -21,7 +21,7 @@ namespace TabsBuilderApi
         public override void Load()
         {
             mls = BepInEx.Logging.Logger.CreateLogSource(Id);
-            mls.LogDebug($"{Id} Awaken");
+            mls.LogDebug($"{Id} the api has Awaken");
             Harmony.PatchAll(typeof(TabsBuilderApi.Patches.PlayerCustomizationMenuPatched));
             TabsBuilderApi.Patches.PlayerCustomizationMenuPatched.registerClass();
         }

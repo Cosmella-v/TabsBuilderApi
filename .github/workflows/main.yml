@@ -1,0 +1,55 @@
+name: CI
+
+on: [ "push", "pull_request" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.x
+
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v1
+        with:
+          verbosity: Diagnostic
+
+      - name: Upload TabsBuilder.dll
+        uses: actions/upload-artifact@v4
+        with:
+          name: TabsBuilder.dll
+          path: **/Release/net6.0/TabsBuilder.dll
+
+      - name: Upload Cosmella.TabApi nupkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cosmella.TabApi.nupkg
+          path: |
+            **/Release/Cosmella.TabApi.*-release.nupkg
+                  - name: Create ZIP package
+        run: |
+          mkdir -p output
+          ZIP_NAME="Thunderstore.zip"
+          FILES="manifest.json README.md icon.png"
+          if [ -f CHANGELOG.md ]; then
+            FILES="$FILES CHANGELOG.md"
+          fi
+          DLL_PATH=$(find . -path "**/Release/net6.0/OutfitsPresets.dll" | head -n 1)
+          if [ -f "$DLL_PATH" ]; then
+            FILES="$FILES $DLL_PATH"
+          fi
+          zip -r "output/$ZIP_NAME" $FILES
+          echo "Created output/$ZIP_NAME"
+
+      - name: Upload Thunderstore's ZIP package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Thunderstore.zip
+          path: output/Thunderstore.zip
