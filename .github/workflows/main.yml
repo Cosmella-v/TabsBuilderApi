@@ -25,7 +25,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TabsBuilder.dll
-          path: **/Release/net6.0/TabsBuilder.dll
+          path: |
+            **/Release/net6.0/TabsBuilder.dll
 
       - name: Upload Cosmella.TabApi nupkg
         uses: actions/upload-artifact@v4
