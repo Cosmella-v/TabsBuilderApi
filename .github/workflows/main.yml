@@ -33,7 +33,7 @@ jobs:
         with:
           name: Cosmella.TabApi.nupkg
           path: |
-            **/Release/Cosmella.TabApi.*-release.nupkg
+            **/*.nupkg
 
       - name: Create ZIP package
         run: |
