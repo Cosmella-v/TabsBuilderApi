@@ -33,18 +33,27 @@ jobs:
           name: Cosmella.TabApi.nupkg
           path: |
             **/Release/Cosmella.TabApi.*-release.nupkg
-                  - name: Create ZIP package
+
+      - name: Create ZIP package
         run: |
           mkdir -p output
           ZIP_NAME="Thunderstore.zip"
+          
+          # Add basic files
           FILES="manifest.json README.md icon.png"
+          
+          # Optionally include CHANGELOG.md
           if [ -f CHANGELOG.md ]; then
             FILES="$FILES CHANGELOG.md"
           fi
-          DLL_PATH=$(find . -path "**/Release/net6.0/OutfitsPresets.dll" | head -n 1)
+          
+          # Include the DLL
+          DLL_PATH=$(find . -type f -path "*/Release/net6.0/OutfitsPresets.dll" | head -n 1)
           if [ -f "$DLL_PATH" ]; then
             FILES="$FILES $DLL_PATH"
           fi
+          
+          # Create ZIP
           zip -r "output/$ZIP_NAME" $FILES
           echo "Created output/$ZIP_NAME"
 
