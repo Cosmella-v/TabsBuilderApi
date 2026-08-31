@@ -3,8 +3,10 @@ using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using Il2CppInterop.Runtime.Injection;
 using System.Linq;
 using TabsBuilderApi.Patches;
+
 
 namespace TabsBuilderApi
 {
@@ -24,6 +26,7 @@ namespace TabsBuilderApi
             mls.LogDebug($"{Id} the api has Awaken");
             Harmony.PatchAll(typeof(TabsBuilderApi.Patches.PlayerCustomizationMenuPatched));
             TabsBuilderApi.Patches.PlayerCustomizationMenuPatched.registerClass();
+            ClassInjector.RegisterTypeInIl2Cpp<TabsBuilderApi.Utils.TabScript>();
         }
     };
 }

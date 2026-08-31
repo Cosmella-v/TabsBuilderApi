@@ -1,41 +1,130 @@
 ﻿using HarmonyLib;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem.Runtime.Remoting.Messaging;
+using TabsBuilderApi.backend;
 using TabsBuilderApi.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.RemoteConfigSettingsHelper;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TabsBuilderApi.backend;
 
 namespace TabsBuilderApi.Patches
 {
-    [HarmonyPatch(typeof(PlayerCustomizationMenu))]
-    public static class PlayerCustomizationMenuPatched
-    {
-        public static TabsBuilderApi.backend.AnotherScroller anotherScroller;
-
-        public static void registerClass()
+    public class PlayerCustomizationMenuBehaviourPatched : MonoBehaviour {
+        public Scroller anotherScroller;
+        private AspectSpacer aspectSpacer;
+        private PlayerCustomizationMenu instance;
+        private int orderSize = 0;
+        protected Il2CppSystem.Collections.Generic.List<Transform> funSpacingSort()
         {
-            Il2CppInterop.Runtime.Injection.ClassInjector.RegisterTypeInIl2Cpp<TabsBuilderApi.backend.ExpandedTabButton>();
-            Il2CppInterop.Runtime.Injection.ClassInjector.RegisterTypeInIl2Cpp<TabsBuilderApi.backend.AnotherScroller>();
+            var orderedChildren = new Il2CppSystem.Collections.Generic.List<Transform>();
+
+            if (instance)
+            {
+                if (instance.BackButton != null)
+                {
+                    orderedChildren.Add(instance.BackButton.transform);
+                }
+
+                foreach (var tab in instance.Tabs)
+                {
+                    if (tab == null)
+                        continue;
+
+                    Transform tabTransform = tab.Button.transform?.parent?.parent;
+
+                    if (tabTransform != null && !orderedChildren.Contains(tabTransform))
+                    {
+                        orderedChildren.Add(tabTransform);
+                    }
+                }
+            };
+            // add the rest
+            for (int i = 0; i < anotherScroller.Inner.childCount; i++)
+            {
+                Transform child = anotherScroller.Inner.GetChild(i);
+
+                if (!orderedChildren.Contains(child))
+                {
+                    orderedChildren.Add(child);
+                }
+            }
+
+            orderedChildren.Remove(instance.glyphR.transform);
+            orderedChildren.Add(instance.glyphR.transform);
+
+            orderedChildren.Remove(instance.glyphL.transform);
+            return orderedChildren;
         }
-
-        [HarmonyPatch(nameof(PlayerCustomizationMenu.Start))]
-        [HarmonyPrefix]
-        public static bool Start_Prefix(PlayerCustomizationMenu __instance)
+        public void triggerSpacing()
         {
-            if (TabBuilder.StartCheck(__instance)) return true;
+            if (!aspectSpacer) return;
+            if (!anotherScroller || !anotherScroller.Inner) return;
+            Camera main = Camera.main;
+            if (!main) return;
+            if (main.aspect > aspectSpacer.defaultAspectRatio &&!aspectSpacer.spaceWiderAspectRatios)return;
+            float num = aspectSpacer.xSpacing *(main.aspect / aspectSpacer.defaultAspectRatio);
+            var orderedChildren = funSpacingSort();
+            if (orderedChildren.Count == 0) return;
+            float num2 = Mathf.Ceil(-orderedChildren.Count / 2f) * num;
+            for (int i = 0; i < orderedChildren.Count; i++)
+            {
+                Transform child = orderedChildren[i];
+                child.localPosition = new Vector3(
+                    num2 + i * num,
+                    child.localPosition.y,
+                    child.localPosition.z
+                );
+            }
+            orderSize = orderedChildren.Count;
+            float maxScroll = Mathf.Max(
+                0f,
+                (orderSize - 1) * num
+            );
 
+            anotherScroller.SetBoundsMin(0, -maxScroll / 2);
+            anotherScroller.SetBoundsMax(0, maxScroll / 2);
+
+            if (instance?.glyphL && instance?.BackButton)
+            {
+                instance.glyphL.transform.position = new Vector3(
+                    instance.BackButton.transform.position.x,
+                    instance.glyphL.transform.position.y,
+                    instance.glyphL.transform.position.z
+                );
+            }
+        
+        }
+        public void OpenTab(PlayerCustomizationMenu __instance, InventoryTab tab)
+        {
+            
+            var tabAPIData = tab.transform?.Find("viper.cosmella.tabAPI");
+            if (anotherScroller != null &&
+                anotherScroller.gameObject != null
+                && (ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick)) anotherScroller.ScrollPercentX(1f - ((float)__instance.selectedTab / (float)(orderSize)));
+            TabsBuilderApi.TabBuilderPlugin.mls.LogMessage($"{(float)__instance.selectedTab / (float)__instance.Tabs.Count} is the %");
+            if (tabAPIData != null)
+            {
+                TabsBuilderApi.backend.ExpandedTabButton ExpandedTabButtonStuffer = tabAPIData.GetComponent<TabsBuilderApi.backend.ExpandedTabButton>();
+                if (ExpandedTabButtonStuffer)
+                {
+
+                    ExpandedTabButtonStuffer.InvokeAction(__instance);
+                }
+            }
+            ;
+            
+            var script = tab.TryCast<TabsBuilderApi.Utils.TabScript>();
+            if (script)
+            {
+                script.componentEnabledFinished(__instance);
+            }
+        }
+        public void onSpawn(PlayerCustomizationMenu __instance)
+        {
+            if (!__instance) return;
+            instance = __instance;
+    
             TabsBuilderApi.backend.TabRegistry.BuildAll(__instance);
-
-            return true;
-        }
-
-        [HarmonyPatch(nameof(PlayerCustomizationMenu.Start))]
-        [HarmonyPostfix]
-        public static void Start_Postfix(PlayerCustomizationMenu __instance)
-        {
-            if (TabBuilder.StartCheck(__instance)) { return; }
-
 
             var header = __instance.transform.FindChild("Header");
 
@@ -47,36 +136,33 @@ namespace TabsBuilderApi.Patches
             if (header == null)
             {
                 header = __instance.Tabs[1].Button.transform.parent.parent;
-            };
+            }
+            ;
             if (header == null)
             {
                 TabsBuilderApi.TabBuilderPlugin.mls.LogFatal("unable to find tabs? 3:");
                 return;
             }
 
-            var AspectSpacer = header.gameObject.GetComponent<AspectSpacer>();
-            if (AspectSpacer)
+            /*this script is the AspectSpacer handler*/
+            aspectSpacer = header.gameObject.GetComponent<AspectSpacer>();
+            if (aspectSpacer)
             {
-                UnityEngine.Object.Destroy(AspectSpacer);
+                aspectSpacer.enabled = false;
             }
-            var AspectSize = header.gameObject.GetComponent<AspectSize>();
-            if (AspectSize)
-            {
-                UnityEngine.Object.Destroy(AspectSize);
-            }
+
             var scrollObj = header.parent.gameObject;
 
             BoxCollider2D collider = scrollObj.GetComponent<BoxCollider2D>();
-            
+
             if (collider == null)
                 collider = scrollObj.AddComponent<BoxCollider2D>();
 
-            collider.size = new Vector2(30f,1f);
+
+            collider.size = new Vector2(30f, 1f);
             collider.offset = Vector2.zero;
 
-            anotherScroller = scrollObj.AddComponent<TabsBuilderApi.backend.AnotherScroller>();
-
-            float width = (float)Screen.width / 1920f;
+            anotherScroller = scrollObj.AddComponent<Scroller>();
 
             anotherScroller.allowX = true;
             anotherScroller.allowY = false;
@@ -86,54 +172,49 @@ namespace TabsBuilderApi.Patches
             anotherScroller.Inner = header;
 
             __instance.BackButton.transform.SetParent(header);
-            __instance.glyphL.gameObject.transform.position = new Vector3(width * -4.5f, __instance.glyphL.gameObject.transform.position.y, __instance.glyphL.gameObject.transform.position.z);
-            __instance.BackButton.transform.position = new Vector3(__instance.glyphL.gameObject.transform.position.x, __instance.BackButton.transform.position.y, __instance.BackButton.transform.position.z);
-            anotherScroller.ScrollPostX(width * -2f);
-            anotherScroller.SetBoundsMax(0, 5);
-            anotherScroller.SetBoundsMin(0, width * -2f);
-            return;
-        }
-
-        [HarmonyPatch(nameof(PlayerCustomizationMenu.Update))]
-        [HarmonyPostfix]
-        public static void Update_Postfix(PlayerCustomizationMenu __instance)
-        {
-           if (anotherScroller)
-            {
-               float width = (float)Screen.width / 1920f;
-               anotherScroller.SetBoundsMax(0, (width * 4) + (__instance.Tabs.Count - 3) );
-               __instance.BackButton.transform.position = new Vector3(__instance.glyphL.gameObject.transform.position.x, __instance.BackButton.transform.position.y, __instance.BackButton.transform.position.z);
-            }
-        }
-
-        [HarmonyPatch(nameof(PlayerCustomizationMenu.OpenTab))]
-        [HarmonyPostfix]
-        public static void OpenTab_Postfix(PlayerCustomizationMenu __instance, InventoryTab tab)
-        {
-            if (!tab) return;
-            var tabAPIData = tab.transform.Find("viper.cosmella.tabAPI");
-            if (anotherScroller.gameObject && (ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick)) anotherScroller.ScrollPostX( (Screen.width / 1920f) + (1 * (__instance.selectedTab - 2) ) );
-            if (tabAPIData != null)
-            {
-                TabsBuilderApi.backend.ExpandedTabButton ExpandedTabButtonStuffer = tabAPIData.GetComponent<TabsBuilderApi.backend.ExpandedTabButton>();
-                if (ExpandedTabButtonStuffer)
-                {
-                    var inner = tab.scroller.Inner;
-
-                    foreach (var child in inner)
-                    {
-                        var childTransform = child.TryCast<Transform>();
-                        if (childTransform != null)
-                        {
-                            UnityEngine.Object.Destroy(childTransform.gameObject);
-                        }
-
-                    }
-                    tab.ColorChips.Clear();
-
-                    ExpandedTabButtonStuffer.InvokeAction(__instance);
-                }
-            };
+            triggerSpacing();
+            anotherScroller.ScrollPercentX(1f);
         }
     }
+
+    [HarmonyPatch(typeof(PlayerCustomizationMenu))]
+    public class PlayerCustomizationMenuPatched 
+    {
+
+        public static void registerClass()
+        {
+            Il2CppInterop.Runtime.Injection.ClassInjector.RegisterTypeInIl2Cpp<TabsBuilderApi.backend.ExpandedTabButton>();
+            Il2CppInterop.Runtime.Injection.ClassInjector.RegisterTypeInIl2Cpp<TabsBuilderApi.Patches.PlayerCustomizationMenuBehaviourPatched>();
+        }
+
+        [HarmonyPatch(nameof(PlayerCustomizationMenu.Start))]
+        [HarmonyPrefix]
+        public static bool Start_Prefix(PlayerCustomizationMenu __instance)
+        {
+            /*
+                A better version of TabBuilder.StartCheck
+                if (TabBuilder.StartCheck(__instance)) return true;
+            */
+            if (__instance.GetComponent<PlayerCustomizationMenuBehaviourPatched>())
+            {
+                return true;
+            }
+            var PlayerCustomizationMenuBehaviourPatched = __instance?.gameObject?.AddComponent<PlayerCustomizationMenuBehaviourPatched>();
+            Prefabs.findChips(__instance);
+            PlayerCustomizationMenuBehaviourPatched.onSpawn(__instance);
+            return true;
+        }
+        
+ [HarmonyPatch(nameof(PlayerCustomizationMenu.OpenTab))]
+ [HarmonyPostfix]
+ public static void OpenTab_Postfix(PlayerCustomizationMenu __instance, InventoryTab tab)
+ {
+     if (!tab) return;
+     var PlayerCustomizationMenuBehaviourPatched = __instance?.gameObject?.GetComponent<PlayerCustomizationMenuBehaviourPatched>();
+            if (PlayerCustomizationMenuBehaviourPatched)
+            {
+                PlayerCustomizationMenuBehaviourPatched.OpenTab(__instance, tab);
+            }
+ }
+}
 }

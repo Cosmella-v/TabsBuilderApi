@@ -1,4 +1,5 @@
 ﻿
+
 using System;
 using System.Linq;
 using TMPro;
@@ -77,11 +78,11 @@ namespace TabsBuilderApi
 
                 var name = tab.name;
                 Scroller scroller = tab.scroller;
-                ColorChip ColorTabPrefab = tab.ColorTabPrefab;
+                // just in case it breaks for some reason!
+                ColorChip ColorTabPrefab = Prefabs.BaseChip ?? tab.ColorTabPrefab;
                 PoolablePlayer PlayerPreview = tab.PlayerPreview;
 
                 var gObject = tab.gameObject;
-
                 UnityEngine.Object.Destroy(tab);
 
                 tab = gObject.AddComponent(type).TryCast<InventoryTab>();
@@ -89,13 +90,7 @@ namespace TabsBuilderApi
                 tab.scroller = scroller;
                 tab.PlayerPreview = PlayerPreview;
                 tab.ColorTabPrefab = ColorTabPrefab;
-
-                tab.YStart = tab.YStart;
-                tab.YOffset = tab.YOffset;
-                tab.NumPerRow = tab.NumPerRow;
-                tab.XRange = tab.XRange;
-
-
+            
                 tab.name = name;
 
                 return this;
@@ -196,36 +191,24 @@ namespace TabsBuilderApi
 
                 menu.Tabs = tabs.ToArray();
 
-                RepositionTabs();
 
                 return tab;
             }
 
             private void OpenTab()
             {
-                if (menu.Tabs[menu.selectedTab].Tab != tab)
+                if (menu?.Tabs[menu.selectedTab]?.Tab != tab)
                 {
                     menu.OpenTab(tab);
                 };
             }
 
             protected void RepositionTabs() {
-                float width = (float)Screen.width / 1920f;
-                var tabs = menu.Tabs.ToList();
-                int count = tabs.Count;
-                for (int i = 0; i < count; i++)
+                var PlayerCustomizationMenuBehaviourPatched = menu?.gameObject?.GetComponent<TabsBuilderApi.Patches.PlayerCustomizationMenuBehaviourPatched>();
+                if (PlayerCustomizationMenuBehaviourPatched)
                 {
-                    var buttonObj = tabs[i].Button.transform.parent.parent;
-                    if (buttonObj != null)
-                    {
-                        buttonObj.position = new Vector3( (width * -4.5f) + (1 * (i+1)), buttonObj.position.y, buttonObj.position.z);
-                    }
+                    PlayerCustomizationMenuBehaviourPatched.triggerSpacing();
                 }
-                var GlyR = menu.glyphR;
-                if (GlyR)
-                {
-                    GlyR.transform.position = new Vector3((width * -4.5f) + (1 * (count + 1)), GlyR.transform.position.y, GlyR.transform.position.z);
-                };
             }
         }
     }
