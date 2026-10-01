@@ -176,6 +176,7 @@ namespace TabsBuilderApi
                 ApiTag.transform.parent = tab.transform;
                 var newTabButton = new TabButton();
                 newTabButton.Tab = tab;
+                tab.ColorChips = new Il2CppSystem.Collections.Generic.List<ColorChip>();
                 newTabButton.Button = topButton.GetComponent<SpriteRenderer>();
                 newTabButton.tabText = tab.transform.Find("Text").GetComponent<TextMeshPro>();
                 if (action != null)
